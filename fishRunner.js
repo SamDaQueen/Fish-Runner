@@ -129,7 +129,7 @@ function spawnObstacles() {
         obstacle.x = width - 100;
         break;
     }
-    obstacle.velocityY = 2 + score / 10;
+    obstacle.velocityY = 2 + score / 50;
     obstacle.lifetime = height / obstacle.velocityY;
 
     obstacle.depth = fish.depth;
@@ -163,7 +163,7 @@ function spawnCollectables() {
         collectable.x = width - 100;
         break;
     }
-    collectable.velocityY = 2 + score / 10;
+    collectable.velocityY = 2 + score / 50;
     collectable.lifetime = height / collectable.velocityY;
 
     collectable.depth = fish.depth;
