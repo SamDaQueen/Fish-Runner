@@ -1,7 +1,7 @@
 var INTRO = -1;
 var PLAY = 1;
 var END = 0;
-var fish, fishImg, pool;
+var fish, fishAnim, pool;
 var obstacle, collectable;
 var obstaclesGroup, collectablesGroup;
 var score, death, reward;
@@ -16,11 +16,16 @@ function preload() {
   createRiver();
   gameOverImg = loadImage("gameover.png");
   restartImg = loadImage("restart.png");
-  fishImg = loadImage("fish.png");
   worm = loadImage("worm.png");
   hook = loadImage("hook.png");
   food = loadImage("food.png");
   poison = loadImage("poison.png");
+
+  fishAnim = loadAnimation("fish1.png", "fish2.png");
+
+  loop = loadSound("techno.mp3");
+  hit = loadSound("pain.mp3");
+  collect = loadSound("collect.mp3");
 }
 
 function setup() {
@@ -34,8 +39,7 @@ function setup() {
   pool.scale = 10;
 
   fish = createSprite(width / 2, height - 70, 40, 20);
-  fish.addImage(fishImg);
-  fish.rotation = 45;
+  fish.addAnimation("swimming", fishAnim);
   fish.scale = 0.12;
   fish.shapeColor = "orange";
 
@@ -53,6 +57,8 @@ function setup() {
   restart = createSprite(width / 2, height / 2 + 40, 10, 10);
   restart.addImage("Restart", restartImg);
   restart.scale = 0.3;
+
+  loop.play();
 }
 
 function draw() {
@@ -123,7 +129,7 @@ function spawnObstacles() {
         obstacle.x = width - 100;
         break;
     }
-    obstacle.velocityY = 2 + score / 100;
+    obstacle.velocityY = 2 + score / 10;
     obstacle.lifetime = height / obstacle.velocityY;
 
     obstacle.depth = fish.depth;
@@ -157,7 +163,7 @@ function spawnCollectables() {
         collectable.x = width - 100;
         break;
     }
-    collectable.velocityY = 2;
+    collectable.velocityY = 2 + score / 10;
     collectable.lifetime = height / collectable.velocityY;
 
     collectable.depth = fish.depth;
@@ -222,12 +228,14 @@ function playState() {
   for (var i = 0; i < obstaclesGroup.length; i++) {
     if (fish.isTouching(obstaclesGroup[i])) {
       obstaclesGroup[i].destroy();
+      hit.play();
       death = death + 1;
     }
   }
   for (var i = 0; i < collectablesGroup.length; i++) {
     if (fish.isTouching(collectablesGroup[i])) {
       collectablesGroup[i].destroy();
+      collect.play();
       reward = reward + 1;
     }
   }
