@@ -1,12 +1,14 @@
+var INTRO = -1;
 var PLAY = 1;
 var END = 0;
 var fish, fishImg, pool;
 var obstacle, collectable;
 var obstaclesGroup, collectablesGroup;
 var score, death, reward;
-var gameState = PLAY;
+var gameState = INTRO;
 var gameOver, restart, gameOverImg, restartImg;
 var river;
+var worm, hook, food, poison;
 
 var width, height;
 
@@ -15,6 +17,10 @@ function preload() {
   gameOverImg = loadImage("gameover.png");
   restartImg = loadImage("restart.png");
   fishImg = loadImage("fish.png");
+  worm = loadImage("worm.png");
+  hook = loadImage("hook.png");
+  food = loadImage("food.png");
+  poison = loadImage("poison.png");
 }
 
 function setup() {
@@ -29,8 +35,8 @@ function setup() {
 
   fish = createSprite(width / 2, height - 70, 40, 20);
   fish.addImage(fishImg);
-  fish.rotation = -90;
-  fish.scale = 0.15;
+  fish.rotation = 45;
+  fish.scale = 0.12;
   fish.shapeColor = "orange";
 
   obstaclesGroup = new Group();
@@ -50,45 +56,14 @@ function setup() {
 }
 
 function draw() {
-  background(255);
-  if (gameState === PLAY) {
-    gameOver.visible = false;
-    restart.visible = false;
+  background(0);
 
-    fishControl();
-    spawnObstacles();
-    spawnCollectables();
-
-    score = score + 0.1;
-
-    for (var i = 0; i < obstaclesGroup.length; i++) {
-      if (fish.isTouching(obstaclesGroup[i])) {
-        obstaclesGroup[i].destroy();
-        death = death + 1;
-      }
-    }
-    for (var i = 0; i < collectablesGroup.length; i++) {
-      if (fish.isTouching(collectablesGroup[i])) {
-        collectablesGroup[i].destroy();
-        reward = reward + 1;
-      }
-    }
-
-    if (death === 1) {
-      gameState = END;
-    }
+  if (gameState === INTRO) {
+    introState();
+  } else if (gameState === PLAY) {
+    playState();
   } else if (gameState === END) {
-    pool.destroy();
-
-    gameOver.visible = true;
-    restart.visible = true;
-    obstaclesGroup.setVelocityYEach(0);
-    collectablesGroup.setVelocityYEach(0);
-    //obstaclesGroup.destroyEach();
-    //collectablesGroup.destroyEach();
-    if (mousePressedOver(restart)) {
-      reset();
-    }
+    endState();
   }
 
   drawSprites();
@@ -96,13 +71,14 @@ function draw() {
   noStroke();
   rectMode(CENTER);
   fill(0, (alpha = 150));
-  rect(width / 2, 45, 130, 70, 100);
+  rect(width / 2, 40, 130, 70, 100);
   fill(255);
-  textSize(18);
+  textSize(16);
   textAlign(CENTER);
-  text("Deaths: " + death, width / 2, 30);
-  text("Rewards: " + reward, width / 2, 50);
-  text("Survived: " + Math.round(score), width / 2, 70);
+  textStyle(ITALIC);
+  text("Deaths: " + death, width / 2, 25);
+  text("Rewards: " + reward, width / 2, 45);
+  text("Survived: " + Math.round(score), width / 2, 65);
 }
 
 function fishControl() {
@@ -127,6 +103,14 @@ function spawnObstacles() {
   if (frameCount % 150 === 0) {
     var position = Math.round(random(1, 3));
     obstacle = createSprite(0, -10, 10, 10);
+
+    if (Math.round(random(0, 1))) {
+      obstacle.addImage(hook);
+    } else {
+      obstacle.addImage(poison);
+    }
+
+    obstacle.scale = 0.05;
     obstacle.shapeColor = 0;
     switch (position) {
       case 1:
@@ -153,6 +137,14 @@ function spawnCollectables() {
   if (frameCount % 200 === 0) {
     var position = Math.round(random(1, 3));
     collectable = createSprite(0, -10, 10, 10);
+
+    if (Math.round(random(0, 1))) {
+      collectable.addImage(worm);
+    } else {
+      collectable.addImage(food);
+    }
+
+    collectable.scale = 0.1;
     collectable.shapeColor = 255;
     switch (position) {
       case 1:
@@ -187,6 +179,77 @@ function reset() {
   reward = 0;
   fish.x = width / 2;
   fish.y = height - 50;
+}
+
+function introState() {
+  gameOver.visible = false;
+  restart.visible = false;
+  pool.visible = false;
+  textSize(24);
+  fill(255);
+  noStroke();
+  textAlign(CENTER, CENTER);
+  textFont("Helvetica");
+  textStyle(BOLDITALIC);
+  text("Welcome to Fish Runner!", 200, 150);
+  textSize(20);
+  textStyle(BOLD);
+  text("\nKeep swimming as you collect\nFish Food and Worms :D", 200, 200);
+  text(
+    "\nBut be careful and avoid the\nPoison Bottles and Fish Hooks!",
+    200,
+    270
+  );
+  textStyle(ITALIC);
+  text("\n\nPress Space to Start!", 200, 350);
+
+  if (keyDown("space")) {
+    gameState = PLAY;
+  }
+}
+
+function playState() {
+  gameOver.visible = false;
+  restart.visible = false;
+  pool.visible = true;
+
+  fishControl();
+  spawnObstacles();
+  spawnCollectables();
+
+  score = score + 0.1;
+
+  for (var i = 0; i < obstaclesGroup.length; i++) {
+    if (fish.isTouching(obstaclesGroup[i])) {
+      obstaclesGroup[i].destroy();
+      death = death + 1;
+    }
+  }
+  for (var i = 0; i < collectablesGroup.length; i++) {
+    if (fish.isTouching(collectablesGroup[i])) {
+      collectablesGroup[i].destroy();
+      reward = reward + 1;
+    }
+  }
+
+  if (death === 10) {
+    gameState = END;
+  }
+}
+
+function endState() {
+  pool.destroy();
+  gameOver.visible = true;
+  restart.visible = true;
+  obstaclesGroup.setVelocityYEach(0);
+  collectablesGroup.setVelocityYEach(0);
+  obstaclesGroup.setLifetimeEach(-1);
+  collectablesGroup.setLifetimeEach(-1);
+  //obstaclesGroup.destroyEach();
+  //collectablesGroup.destroyEach();
+  if (mousePressedOver(restart)) {
+    reset();
+  }
 }
 
 function createRiver() {
