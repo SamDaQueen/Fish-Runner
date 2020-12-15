@@ -4,7 +4,7 @@ var END = 0;
 var fish, fishAnim, pool;
 var obstacle, collectable;
 var obstaclesGroup, collectablesGroup;
-var score, death, reward;
+var score, hit, reward;
 var gameState = INTRO;
 var gameOver, restart, gameOverImg, restartImg;
 var river;
@@ -13,7 +13,7 @@ var worm, hook, food, poison;
 var width, height;
 
 function preload() {
-  createRiver();
+  river = loadImage("double.png");
   gameOverImg = loadImage("gameover.png");
   restartImg = loadImage("restart.png");
   worm = loadImage("worm.png");
@@ -24,19 +24,21 @@ function preload() {
   fishAnim = loadAnimation("fish1.png", "fish2.png");
 
   loop = loadSound("techno.mp3");
-  hit = loadSound("pain.mp3");
+  pain = loadSound("pain.mp3");
   collect = loadSound("collect.mp3");
 }
 
 function setup() {
+  loop.play();
+
   width = 400;
   height = 600;
 
   createCanvas(width, height);
 
-  pool = createSprite(width / 2, height / 2);
+  pool = createSprite(width / 2, 400);
   pool.addAnimation("river", river);
-  pool.scale = 10;
+  pool.scale = 1;
 
   fish = createSprite(width / 2, height - 70, 40, 20);
   fish.addAnimation("swimming", fishAnim);
@@ -47,7 +49,7 @@ function setup() {
   collectablesGroup = new Group();
 
   score = 0;
-  death = 0;
+  hit = 0;
   reward = 0;
 
   gameOver = createSprite(width / 2, height / 2 - 50, 10, 10);
@@ -57,8 +59,6 @@ function setup() {
   restart = createSprite(width / 2, height / 2 + 40, 10, 10);
   restart.addImage("Restart", restartImg);
   restart.scale = 0.3;
-
-  loop.play();
 }
 
 function draw() {
@@ -82,7 +82,7 @@ function draw() {
   textSize(16);
   textAlign(CENTER);
   textStyle(ITALIC);
-  text("Deaths: " + death, width / 2, 25);
+  text("Hits: " + hit, width / 2, 25);
   text("Rewards: " + reward, width / 2, 45);
   text("Survived: " + Math.round(score), width / 2, 65);
 }
@@ -129,7 +129,7 @@ function spawnObstacles() {
         obstacle.x = width - 100;
         break;
     }
-    obstacle.velocityY = 2 + score / 50;
+    obstacle.velocityY = 2 + (3 * score) / 100;
     obstacle.lifetime = height / obstacle.velocityY;
 
     obstacle.depth = fish.depth;
@@ -163,7 +163,7 @@ function spawnCollectables() {
         collectable.x = width - 100;
         break;
     }
-    collectable.velocityY = 2 + score / 50;
+    collectable.velocityY = 2 + (3 * score) / 100;
     collectable.lifetime = height / collectable.velocityY;
 
     collectable.depth = fish.depth;
@@ -175,13 +175,15 @@ function spawnCollectables() {
 
 function reset() {
   gameState = PLAY;
+  loop.play();
   pool = createSprite(width / 2, height / 2);
   pool.addAnimation("river", river);
-  pool.scale = 10;
+  obstaclesGroup.destroyEach();
+  collectablesGroup.destroyEach();
   pool.depth = 1;
 
   score = 0;
-  death = 0;
+  hit = 0;
   reward = 0;
   fish.x = width / 2;
   fish.y = height - 50;
@@ -218,6 +220,11 @@ function playState() {
   gameOver.visible = false;
   restart.visible = false;
   pool.visible = true;
+  pool.velocityY = 2 + (3 * score) / 100;
+
+  if (pool.y > 800) {
+    pool.y = 0;
+  }
 
   fishControl();
   spawnObstacles();
@@ -228,8 +235,8 @@ function playState() {
   for (var i = 0; i < obstaclesGroup.length; i++) {
     if (fish.isTouching(obstaclesGroup[i])) {
       obstaclesGroup[i].destroy();
-      hit.play();
-      death = death + 1;
+      pain.play();
+      hit = hit + 1;
     }
   }
   for (var i = 0; i < collectablesGroup.length; i++) {
@@ -240,12 +247,14 @@ function playState() {
     }
   }
 
-  if (death === 10) {
+  if (hit === 10) {
     gameState = END;
   }
 }
 
 function endState() {
+  background(255);
+  loop.stop();
   pool.destroy();
   gameOver.visible = true;
   restart.visible = true;
@@ -253,94 +262,7 @@ function endState() {
   collectablesGroup.setVelocityYEach(0);
   obstaclesGroup.setLifetimeEach(-1);
   collectablesGroup.setLifetimeEach(-1);
-  //obstaclesGroup.destroyEach();
-  //collectablesGroup.destroyEach();
   if (mousePressedOver(restart)) {
     reset();
   }
-}
-
-function createRiver() {
-  river = loadAnimation(
-    "R/r0.png",
-    "R/r1.png",
-    "R/r2.png",
-    "R/r3.png",
-    "R/r4.png",
-    "R/r5.png",
-    "R/r6.png",
-    "R/r7.png",
-    "R/r8.png",
-    "R/r9.png",
-    "R/r10.png",
-    "R/r11.png",
-    "R/r12.png",
-    "R/r13.png",
-    "R/r14.png",
-    "R/r15.png",
-    "R/r16.png",
-    "R/r17.png",
-    "R/r18.png",
-    "R/r19.png",
-    "R/r20.png",
-    "R/r21.png",
-    "R/r22.png",
-    "R/r23.png",
-    "R/r24.png",
-    "R/r25.png",
-    "R/r26.png",
-    "R/r27.png",
-    "R/r28.png",
-    "R/r29.png",
-    "R/r30.png",
-    "R/r31.png",
-    "R/r32.png",
-    "R/r33.png",
-    "R/r34.png",
-    "R/r35.png",
-    "R/r36.png",
-    "R/r37.png",
-    "R/r38.png",
-    "R/r39.png",
-    "R/r40.png",
-    "R/r41.png",
-    "R/r42.png",
-    "R/r43.png",
-    "R/r44.png",
-    "R/r45.png",
-    "R/r46.png",
-    "R/r47.png",
-    "R/r48.png",
-    "R/r49.png",
-    "R/r50.png",
-    "R/r51.png",
-    "R/r52.png",
-    "R/r53.png",
-    "R/r54.png",
-    "R/r55.png",
-    "R/r56.png",
-    "R/r57.png",
-    "R/r58.png",
-    "R/r59.png",
-    "R/r60.png",
-    "R/r61.png",
-    "R/r62.png",
-    "R/r63.png",
-    "R/r64.png",
-    "R/r65.png",
-    "R/r66.png",
-    "R/r67.png",
-    "R/r68.png",
-    "R/r69.png",
-    "R/r70.png",
-    "R/r71.png",
-    "R/r72.png",
-    "R/r73.png",
-    "R/r74.png",
-    "R/r75.png",
-    "R/r76.png",
-    "R/r77.png",
-    "R/r78.png",
-    "R/r79.png"
-  );
 }
