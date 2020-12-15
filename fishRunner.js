@@ -106,7 +106,7 @@ function fishControl() {
 }
 
 function spawnObstacles() {
-  if (frameCount % 150 === 0) {
+  if (frameCount % 137 === 0) {
     var position = Math.round(random(1, 3));
     obstacle = createSprite(0, -10, 10, 10);
 
@@ -140,7 +140,7 @@ function spawnObstacles() {
 }
 
 function spawnCollectables() {
-  if (frameCount % 200 === 0) {
+  if (frameCount % 199 === 0) {
     var position = Math.round(random(1, 3));
     collectable = createSprite(0, -10, 10, 10);
 
