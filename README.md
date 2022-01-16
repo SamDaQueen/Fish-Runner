@@ -1,3 +1,3 @@
 # Fish Runner
 
-Project created using JavaScript and p5.play library for C9-C21 Webinar Series.
+An infinite runner created in JavaScript using the p5 play library.
